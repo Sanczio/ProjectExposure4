@@ -23,14 +23,10 @@ public class ScriptPlayerHUD : MonoBehaviour {
 
 	void Start()
 	{
-		energyObject = GameObject.Find("energyLevel");
+		//energyObject = GameObject.Find("energyLevel");
 		canvas = GameObject.Find ("Canvas");
-		if (energyObject != null) {
-			energyLevel = energyObject.GetComponent<Slider> ();
-		}
 
-		energyLevel.maxValue = 100;
-		energyLevel.minValue = 0;
+
 
 		imagePrefab = (GameObject)Resources.Load("prefabs/CanvasPrefabs/tutorial_image_1");
 		imagePrefab = (GameObject)Instantiate (imagePrefab, new Vector2(Screen.width / 10 ,Screen.height / 10 * 7) , imagePrefab.transform.rotation);
@@ -40,6 +36,17 @@ public class ScriptPlayerHUD : MonoBehaviour {
 		main_text = (GameObject)Instantiate(main_text, new Vector2(Screen.width / 10 * 6 - tempText.rectTransform.rect.width /2 ,Screen.height / 10 * 2 ) , main_text.transform.rotation);
 		main_text.transform.SetParent (canvas.transform, false);
 	}
+
+
+
+
+
+
+	public void setEnergyLevel(GameObject slider)
+	{
+		energyLevel = slider.GetComponent<Slider> ();
+	}
+
 
 	void Update()
 	{

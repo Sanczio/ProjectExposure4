@@ -17,12 +17,17 @@ public class ScriptAssignmentController : MonoBehaviour {
 	private Text trash_c_text;
 	private Text trash_bio_text;
 
+	private GameObject timeSlider;
+	private GameObject energySlider;
+
 	private GameObject canvas;
 	private GameObject trash_a_prefab;
 	private GameObject trash_b_prefab;
 	private GameObject trash_c_prefab;
 
-
+	private bool readyToDeliver = false;
+	private bool calculateTime = false;
+	private bool showVideo = true;
 
 
 	private float time_left;
@@ -33,6 +38,11 @@ public class ScriptAssignmentController : MonoBehaviour {
 		new int[] {0,0,0} ,
 		new int[] {0,0,0} ,
 	};
+
+	private List<GameObject> a_trash_images = new List<GameObject>();
+	private List<GameObject> b_trash_images = new List<GameObject>();
+	private List<GameObject> c_trash_images = new List<GameObject>();
+
 
 	private ScriptCameraControl cameraScript;
 	private ScriptArea area_1;
@@ -47,15 +57,8 @@ public class ScriptAssignmentController : MonoBehaviour {
 		hud = GameObject.Find ("Root").GetComponent<ScriptPlayerHUD> ();
 		canvas = GameObject.Find ("Canvas");
 		player = GameObject.Find ("Player").GetComponent<ScriptPlayerControls> ();
-		timer_text = GameObject.Find("timer_text").GetComponent<Text>();
-		//trash_a_text = GameObject.Find("trash_a_text").GetComponent<Text>();
-		//trash_b_text = GameObject.Find("trash_b_text").GetComponent<Text>();
-		//trash_c_text = GameObject.Find("trash_c_text").GetComponent<Text>();
-		//trash_bio_text = GameObject.Find("trash_bio_text").GetComponent<Text>();
-//		tutorial = GameObject.Find ("Tutorial").GetComponent<ScriptArea> ();
-//		area_1 = GameObject.Find ("Area1").GetComponent<ScriptArea> ();
-//		area_2 = GameObject.Find ("Area2").GetComponent<ScriptArea> ();
-//		area_3 = GameObject.Find ("Area3").GetComponent<ScriptArea> ();
+		//timer_text = GameObject.Find("timer_text").GetComponent<Text>();
+
 		gameplaySettings = GameObject.Find ("Root").GetComponent<ScriptSettingsGameplay> ();
 
 		time_limits[0] = gameplaySettings.assignment_1_time;
@@ -85,74 +88,108 @@ public class ScriptAssignmentController : MonoBehaviour {
 		trash_b_prefab = (GameObject)Resources.Load("prefabs/CanvasPrefabs/trash_b_image");
 		trash_c_prefab = (GameObject)Resources.Load("prefabs/CanvasPrefabs/trash_c_image");
 
-//		trash_a_text.gameObject.transform.position = new Vector3 (Screen.width / 10, trash_a_text.gameObject.transform.position.y, 0);
-//		trash_b_text.gameObject.transform.position = new Vector3 (Screen.width / 10, trash_b_text.gameObject.transform.position.y, 0);
-//		trash_c_text.gameObject.transform.position = new Vector3 (Screen.width / 10, trash_c_text.gameObject.transform.position.y, 0);
-//		trash_bio_text.gameObject.transform.position = new Vector3 (Screen.width / 10, trash_bio_text.gameObject.transform.position.y, 0);
-		timer_text.gameObject.transform.position = new Vector3 (timer_text.gameObject.transform.position.x, Screen.height / 8 * 7 , 0);
+		timeSlider = (GameObject)Resources.Load ("prefabs/CanvasPrefabs/timeSlider");
+		timeSlider.GetComponent<Slider>().maxValue = time_limits [0];
+		timeSlider.GetComponent<Slider>().minValue = 0;
 
-		spawnImages ();
+		energySlider = (GameObject)Resources.Load ("prefabs/CanvasPrefabs/energyLevel");
+		energySlider.GetComponent<Slider>().maxValue = 100;
+		energySlider.GetComponent<Slider>().minValue = 0;
+
+		//timer_text.gameObject.transform.position = new Vector3 (timer_text.gameObject.transform.position.x, Screen.height / 8 * 7 , 0);
+
+		StartCoroutine (spawnStartHUD (8));
+		//StartCoroutine (showStartVideo (5));
 	}
-	private bool readyToDeliver = false;
+
+
 	// Update is called once per frame
 	void Update () {
 
-
-		//drawHud ();
 		if (assignment [assignmentNr] [0] <= player_trash [1] && assignment [assignmentNr] [1] <= player_trash [2] && assignment [assignmentNr] [2] <= player_trash [3]) {
 			readyToDeliver = true;
 		} else
 			readyToDeliver = false;
-
-
-		if (assignmentNr < 4 && readyToDeliver && collidingWithAssignmentGiver == true) {
-			Debug.Log ("assignment completed");
-			player.resetTrashCollected ();
-			deleteImages ();
-			assignmentNr += 1;
-			hud.AddEnergy (25);
-			time_left = time_limits [assignmentNr];
-			spawnImages ();
-		}
-		if( assignment[3][0] <= player_trash[0] )
-		{
-			hud.AddEnergy (25);
-		}
+		
 		if (time_left <= 0 && assignmentNr < 3) {
-			assignmentNr += 1;
-			player.resetTrashCollected ();
-			deleteImages ();
-			spawnImages ();
-			time_left = time_limits [assignmentNr];
+			//changeAssignment ();
 		}
 			
-		if (assignmentNr > 0) {
-			//area_1.gameObject.GetComponent<Collider>().isTrigger = true;
-			//tutorial.setGrayscaledArea (false);
-		}
-		if (assignmentNr > 1) {
-			//area_2.gameObject.GetComponent<Collider>().isTrigger = true;
-			//area_1.setGrayscaledArea (false);
-		}
-		if (assignmentNr > 2) {
-			//area_3.gameObject.GetComponent<Collider>().isTrigger = true;
-			//area_2.setGrayscaledArea (false);
-		}
-				
-		collidingWithAssignmentGiver = false;
-		timer_text.text = Mathf.RoundToInt(time_left).ToString ()+" s left";
-		if ( time_left > 0 )
+		if (calculateTime && time_left > 0 ) {
 			time_left -= Time.deltaTime;
-		
+		}
+		if (timeSlider)
+			timeSlider.GetComponent<Slider> ().value = time_left;
+	}
+
+	IEnumerator changeAssignment( float time , int nr )
+	{
+		yield return new WaitForSeconds (time);
+		player.resetTrashCollected ();
+		deleteImages ();
+
+		time_left = time_limits [assignmentNr];
+		timeSlider.GetComponent<Slider> ().maxValue = time_limits [assignmentNr];
+		spawnImages ();
+
+		if (nr == 0) {
+			GameObject.Find("Player").gameObject.transform.position  = GameObject.Find( "TriggerArea_1_2").gameObject.transform.position;
+			GameObject.Find ("Player").GetComponent<Rigidbody> ().velocity = Vector3.zero;
+		}
+		calculateTime = true;
+		showVideo = true;
 
 	}
 
-	private List<GameObject> a_trash_images = new List<GameObject>();
-	private List<GameObject> b_trash_images = new List<GameObject>();
-	private List<GameObject> c_trash_images = new List<GameObject>();
+	IEnumerator spawnStartHUD( float time )
+	{
+		yield return new WaitForSeconds (time);
+
+		timeSlider = (GameObject)Instantiate (timeSlider, new Vector2(Screen.width/20 + timeSlider.GetComponent<RectTransform>().rect.width / 2,Screen.height /20 * 19 ), timeSlider.transform.rotation);
+		timeSlider.transform.SetParent (canvas.transform, false);
+
+		energySlider = (GameObject)Instantiate (energySlider, new Vector2(-Screen.width/20 , energySlider.GetComponent<RectTransform>().rect.height / 2 ), energySlider.transform.rotation);
+		energySlider.transform.SetParent (canvas.transform, false);
+		GameObject.Find ("Root").GetComponent<ScriptPlayerHUD> ().setEnergyLevel (energySlider);
+
+		spawnImages ();
+		calculateTime = true;
+
+	}
+
+	public void setDeliveringGoods(int giverNum) // 0 - tuto , 1 - area1 , etc.
+	{
+		if (readyToDeliver && assignmentNr == giverNum) {
+			if ( assignmentNr < 4 )
+				assignmentNr += 1;
+			calculateTime = false;
+			showVideo = false;
+
+			switch (giverNum) {
+			case 0:
+				StartCoroutine (changeAssignment (5,giverNum));
+				// add on complete hud image
+				break;
+			case 1:
+				break;
+			case 2:
+				break;
+			case 3:
+				break;
+			}
+		} else if ( showVideo )
+			GameObject.Find ("videoTexture").GetComponent<ScriptMovieTexture> ().playVideo (""+giverNum.ToString() );
+
+	}
+
+
+
+
+
 
 	private void spawnImages()
 	{
+
 		if (assignment [assignmentNr] [0] > 0) {
 			int tempDif = 0;
 			for (int i = 0; i < assignment [assignmentNr] [0]; i++) {
@@ -267,17 +304,6 @@ public class ScriptAssignmentController : MonoBehaviour {
 
 	}
 
-	public void setDeliveringGoods(int giverNum) // 0 - tuto , 1 - area1 , etc.
-	{
-		if (readyToDeliver && giverNum == 0) {
-			GameObject.Find("Player").gameObject.transform.position  = GameObject.Find( "TriggerArea_1_2").gameObject.transform.position;
-			//GameObject.Find("Player").gameObject.transform.Translate
-		}
-		
-		if (assignmentNr == giverNum) {
-			collidingWithAssignmentGiver = true;
-		}
-	}
 
 	public int getAssignmentNr()
 	{

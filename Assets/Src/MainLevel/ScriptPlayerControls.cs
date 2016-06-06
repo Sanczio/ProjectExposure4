@@ -126,12 +126,7 @@ public class ScriptPlayerControls : MonoBehaviour {
 		
 	void Update()
 	{
-		if ( Input.GetKeyDown(KeyCode.R) )
-			gameObject.GetComponent<ScriptPlayerControls>().removeResource();
-		if (Input.GetKeyDown (KeyCode.V)) {
-			ScriptSlowMotion slow = GameObject.Find ("Root").GetComponent<ScriptSlowMotion> ();
-			slow.slowMotion (3, true, 0.1f);
-		}
+		
 
 		if (Input.GetMouseButtonDown(0) || lastScreenTouch.phase == TouchPhase.Began)
         {
@@ -147,6 +142,14 @@ public class ScriptPlayerControls : MonoBehaviour {
                 }
             }
         }
+
+		if (Input.GetKeyDown (KeyCode.R)) {
+			GameObject.Find ("Image").GetComponent<ScriptMovieTexture> ().playVideo ("44");
+		}
+		if (Input.GetKeyDown (KeyCode.V)) {
+			ScriptSlowMotion slow = GameObject.Find ("Root").GetComponent<ScriptSlowMotion> ();
+			slow.slowMotion (3, true, 0.1f);
+		}
 
         if (Input.GetKeyDown (KeyCode.B))
 		{

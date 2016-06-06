@@ -16,7 +16,7 @@ public class ScriptAssignmentGiver : MonoBehaviour {
 		assignmentController = GameObject.Find ("Root").GetComponent<ScriptAssignmentController> ();
 	}
 
-	void OnTriggerStay(Collider collider)
+	void OnTriggerEnter(Collider collider)
 	{
 		if (collider.tag == "PlayerCrashCollider") {
 			int giverNr = 0;
