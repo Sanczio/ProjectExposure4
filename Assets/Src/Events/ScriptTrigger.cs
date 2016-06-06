@@ -21,7 +21,7 @@ public class ScriptTrigger : MonoBehaviour {
 
     public enum PickUpType
     {
-        SpeedBoost, Shooting
+        SpeedBoost, Shooting, InstaPickUp
     }
 
     public enum CarRoadSide

@@ -221,7 +221,11 @@ public class CustomInspectorTrigger : Editor
             case ScriptTrigger.PickUpType.Shooting:
                 targetTrigger._pickUpType = "Shooting";
                 break;
+            case ScriptTrigger.PickUpType.InstaPickUp:
+                targetTrigger._pickUpType = "InstaPickUp";
+                break;
         }
+        
     }
 
     void ShowCarType(ScriptTrigger targetTrigger)

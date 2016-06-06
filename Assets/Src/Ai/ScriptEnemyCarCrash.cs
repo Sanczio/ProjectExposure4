@@ -64,13 +64,23 @@ public class ScriptEnemyCarCrash : MonoBehaviour {
 
     void GivePlayerReward()
     {
-        //give player cookie 
+        ScriptPickUpSpawner tempScript = GameObject.Find("Root").GetComponent<ScriptPickUpSpawner>();
+        tempScript.CallPickUpSpawner(DecideWhatPickUp(), this.gameObject.transform);
 
+    }
+
+    string DecideWhatPickUp()
+    {
+
+
+        return "ShootingBoost";
     }
 
     //Play Crash animation before this
     void DestroyCar()
     {
+        ScriptCarSpawner tempScript = GameObject.Find("Root").GetComponent<ScriptCarSpawner>();
+        tempScript.RemoveCarFromList(this.gameObject);
         Destroy(this.gameObject, _timeToDestroy);
 
     }
@@ -80,8 +90,5 @@ public class ScriptEnemyCarCrash : MonoBehaviour {
         _carIsFull = trashStatus;
     }
 
-    void spawnTrash()
-    {
-        GameObject spawnTrash = Instantiate(_trashObject, this.transform.position, Quaternion.identity) as GameObject;
-    }
+
 }

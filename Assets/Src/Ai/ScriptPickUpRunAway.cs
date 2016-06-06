@@ -36,23 +36,23 @@ public class ScriptPickUpRunAway : MonoBehaviour {
         _active = status;
     }
 
-    public void ActivatePickUp(Transform playerPosition)
+    public void ActivatePickUp(Transform playerPosition, bool instaPick)
     {
 		if ( _active && _agent != null && gameObject != null && _agent.enabled)
         {
-            _agent.destination = DecideWhereToGo(playerPosition);
+            _agent.destination = DecideWhereToGo(playerPosition, instaPick);
         }
 		
     }
 
-    Vector3 DecideWhereToGo(Transform playerPosition)
+    Vector3 DecideWhereToGo(Transform playerPosition, bool instaPick)
     {   
         
 
 		Vector3 goalPosition ;
         Transform tempTransform = this.GetComponent<Transform>();
         float distancePlayerTrash = Vector3.Distance(tempTransform.position, playerPosition.position );
-        if (distancePlayerTrash <= _runToPlayerDistanc)
+        if (distancePlayerTrash <= _runToPlayerDistanc || instaPick)
         {
             return playerPosition.position;
         } else

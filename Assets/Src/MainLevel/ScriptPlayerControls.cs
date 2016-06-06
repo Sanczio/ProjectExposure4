@@ -63,6 +63,8 @@ public class ScriptPlayerControls : MonoBehaviour {
 
     //Shooting
     private ScriptPlayerShooting _scriptPlayerShooting;
+    private bool _unlimitedAmmo = false;
+    private float _unlimitedAmmoTime = 1.0f;
 
 	void Start () {
 		GameObject.Find ("Main Camera").AddComponent<ScriptCameraControl> ();
@@ -140,7 +142,7 @@ public class ScriptPlayerControls : MonoBehaviour {
 			if (Physics.Raycast(Camera.main.ScreenPointToRay(lastScreenTouch.position), out hit, 100))
             {
                 //print(hit.collider.name);
-                if (overallTrashCollected >= 1 && hit.transform.tag == "EnemyCar")
+                if ((overallTrashCollected >= 1 || _unlimitedAmmo == true) && hit.transform.tag == "EnemyCar")
                 {
                     
                     CallBulletSpawner(hit.collider.gameObject);
@@ -457,4 +459,16 @@ public class ScriptPlayerControls : MonoBehaviour {
 		return returnNum;
 	}
 
+   IEnumerator UnlimitedShooting()
+    {
+        _unlimitedAmmo = true;
+        yield return new WaitForSeconds(_unlimitedAmmoTime);
+        _unlimitedAmmo = false;
+    }
+
+    public void ActivateUnlimitedAmmo()
+    {
+        StartCoroutine(UnlimitedShooting());
+    }
 }
+

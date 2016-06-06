@@ -3,11 +3,12 @@ using System.Collections;
 
 public class ScriptPickUp : MonoBehaviour {
 
-	public enum State{
-		boost,idle,attacking,eating,sleeping
-	}
-	public State pickUp = State.boost;
+    public string _pickUpType;
 	private ScriptPlayerControls player;
+
+    private float _slowMTime = 1.0f;
+    private bool _ifPlayerSlowed = false;
+    private float _percentToSlow = 0.5f;
 
 	void Start()
 	{
@@ -16,23 +17,32 @@ public class ScriptPickUp : MonoBehaviour {
 
 	void OnTriggerEnter(Collider collider)
 	{
-		if (collider.gameObject.tag == "PlayerCrashCollider") {
-			switch (pickUp) {
-			case State.boost:
-				doBoost();
-				break;
-			default :
-				Debug.Log ("no pickup state");
-				break;
-			}
-		}
+		if (collider.gameObject.tag == "pickUpCollider") {
+			switch (_pickUpType) {
+            case "MovementBoost":
+                    ScriptSlowMotion tempSlow = GameObject.Find("Root").GetComponent<ScriptSlowMotion>();
+                    tempSlow.slowMotion(_slowMTime, _ifPlayerSlowed, _percentToSlow);
+                    Destroy(this.gameObject);
+                    break;
+
+            case "ShootingBoost":
+                    ScriptPlayerControls tempScript = player.GetComponent<ScriptPlayerControls>();
+                    tempScript.ActivateUnlimitedAmmo();
+                    Destroy(this.gameObject);
+                    break;
+            case "InstaPickUp":
+                    ScriptActiveRunAway tempRunAwayScript = player.GetComponentInChildren<ScriptActiveRunAway>();
+                    tempRunAwayScript.ActivateInstaPick();
+                    Destroy(this.gameObject);
+                    break;
+            }
+        }
 	}
 
 
-	void doBoost()
+	public void SetPickUpType(string pickUpType)
 	{
-		Debug.Log (" player boosted");
-		player.boostPlayer(gameObject);
+        _pickUpType = pickUpType;
 	}
 
 }
